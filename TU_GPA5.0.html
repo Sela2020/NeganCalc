@@ -78,7 +78,7 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div class="flex items-center space-x-4 bg-white rounded-xl p-3 shadow-sm">
                 <div class="relative">
-                    <img class="w-13 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold shadow-md" src="IMG_2741-2.jpg" alt="">
+                    <a href="index.html"><img class="w-13 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold shadow-md" src="IMG_2741-2.jpg" alt=""></a>
                     <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold shadow-md">
                         <span id="userInitials">JD</span>
                     </div>
@@ -97,6 +97,33 @@
             </div>
         </header>
 
+        <!-- Go to home -->
+        <a href="index.html" class="home-btn">Go to Home</a>
+
+        <style>
+          .home-btn {
+            display: inline-block;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+        
+          .home-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+          }
+        
+          .home-btn:active {
+            transform: scale(0.97);
+            background-color: #004080;
+          }
+        </style>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Column - Semesters and Courses -->
             <div class="lg:col-span-2 space-y-6">
