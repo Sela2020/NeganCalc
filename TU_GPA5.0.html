@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPA/CGPA Calculator Toolkit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .toolkit-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .toolkit-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        .grading-scale {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .grade-Aplus { background-color: #10b981; color: white; }
+        .grade-A { background-color: #34d399; color: white; }
+        .grade-Bplus { background-color: #60a5fa; color: white; }
+        .grade-B { background-color: #93c5fd; color: white; }
+        .grade-Cplus { background-color: #f59e0b; color: white; }
+        .grade-C { background-color: #fbbf24; color: white; }
+        .grade-Dplus { background-color: #f97316; color: white; }
+        .grade-D { background-color: #fb923c; color: white; }
+        .grade-F { background-color: #ef4444; color: white; }
+        .course-input:focus {
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /*EKB*/
+        .w-12{
+            display: none !important;
+        }
+        .w-13{
+            width: 5em;
+            height: 5em !important;   
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with User Profile -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="flex items-center space-x-4 bg-white rounded-xl p-3 shadow-sm">
+                <div class="relative">
+                    <img class="w-13 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold shadow-md" src="IMG_2741-2.jpg" alt="">
+                    <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                        <span id="userInitials">JD</span>
+                    </div>
+                </div>
+                <div>
+                    <h1 id="userName" class="text-xl font-semibold text-gray-800">Eselase Bali-Banini</h1>
+                    <h2 id="userName" class="text-sm font-semibold text-purple-800">Frontend Developer</h2>
+                    <a href="https://portfolio.html" target="_blank" id="portfolioLink" class="text-indigo-600 hover:underline text-sm flex items-center">
+                        <i class="fas fa-external-link-alt mr-1 text-xs"></i> View Portfolio
+                    </a>
+                </div>
+            </div>
+            <div class="text-center md:text-right">
+                <h1 class="text-3xl font-bold text-gray-800">GPA Toolkit</h1>
+                <p class="text-gray-600">Track your academic performance</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - Semesters and Courses -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Semesters Section -->
+                <div class="toolkit-card bg-white p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i> Semesters
+                        </h2>
+                        <button id="addSemesterBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:shadow-lg transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Semester
+                        </button>
+                    </div>
+                    
+                    <div id="semestersContainer" class="space-y-4">
+                        <!-- Semesters will be added here dynamically -->
+                        <div class="text-center py-8 text-gray-500" id="noSemestersMessage">
+                            <i class="fas fa-calendar-plus text-4xl mb-2 text-indigo-300"></i>
+                            <p class="text-lg">No semesters added yet</p>
+                            <p class="text-sm mt-2">Click "Add Semester" to get started</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GPA Progression Chart -->
+                <div class="toolkit-card bg-white p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-chart-line mr-2 text-indigo-500"></i> GPA Progression
+                    </h2>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="gpaChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Summary and Tools -->
+            <div class="space-y-6">
+                <!-- Summary Section -->
+                <div class="toolkit-card bg-white p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-chart-pie mr-2 text-indigo-500"></i> Academic Summary
+                    </h2>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-university mr-2 text-blue-400"></i> Current Semester
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 mb-2">
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <p class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-clock mr-1"></i> Credit Hours
+                                </p>
+                                <p id="currentCreditHours" class="text-xl font-semibold">0</p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <p class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-star mr-1"></i> Grade Points
+                                </p>
+                                <p id="currentGradePoints" class="text-xl font-semibold">0.00</p>
+                            </div>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                            <p class="text-sm text-indigo-600 flex items-center">
+                                <i class="fas fa-calculator mr-1"></i> Semester GPA
+                            </p>
+                            <p id="currentGPA" class="text-2xl font-bold text-indigo-700">0.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-graduation-cap mr-2 text-purple-400"></i> Cumulative
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 mb-2">
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <p class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-clock mr-1"></i> Total Credits
+                                </p>
+                                <p id="totalCreditHours" class="text-xl font-semibold">0</p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <p class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-star mr-1"></i> Total Points
+                                </p>
+                                <p id="totalGradePoints" class="text-xl font-semibold">0.00</p>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                            <p class="text-sm text-purple-600 flex items-center">
+                                <i class="fas fa-calculator mr-1"></i> CGPA
+                            </p>
+                            <p id="cgpa" class="text-2xl font-bold text-purple-700">0.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-100">
+                        <p class="text-sm text-green-600 flex items-center">
+                            <i class="fas fa-award mr-1"></i> Academic Class
+                        </p>
+                        <p id="academicClass" class="text-xl font-bold text-green-700">-</p>
+                    </div>
+                </div>
+
+                <!-- Grading Scale -->
+                <div class="toolkit-card grading-scale p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-ruler mr-2 text-indigo-500"></i> Grading Scale (5.0)
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Point</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Score Range</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="grade-Aplus">
+                                    <td class="px-4 py-2 font-medium text-center">A+</td>
+                                    <td class="px-4 py-2 font-medium text-center">5.0</td>
+                                    <td class="px-4 py-2 font-medium text-center">85–100</td>
+                                </tr>
+                                <tr class="grade-A">
+                                    <td class="px-4 py-2 font-medium text-center">A</td>
+                                    <td class="px-4 py-2 font-medium text-center">4.5</td>
+                                    <td class="px-4 py-2 font-medium text-center">80–84</td>
+                                </tr>
+                                <tr class="grade-Bplus">
+                                    <td class="px-4 py-2 font-medium text-center">B+</td>
+                                    <td class="px-4 py-2 font-medium text-center">4.0</td>
+                                    <td class="px-4 py-2 font-medium text-center">75–79</td>
+                                </tr>
+                                <tr class="grade-B">
+                                    <td class="px-4 py-2 font-medium text-center">B</td>
+                                    <td class="px-4 py-2 font-medium text-center">3.5</td>
+                                    <td class="px-4 py-2 font-medium text-center">70–74</td>
+                                </tr>
+                                <tr class="grade-Cplus">
+                                    <td class="px-4 py-2 font-medium text-center">C+</td>
+                                    <td class="px-4 py-2 font-medium text-center">3.0</td>
+                                    <td class="px-4 py-2 font-medium text-center">65–69</td>
+                                </tr>
+                                <tr class="grade-C">
+                                    <td class="px-4 py-2 font-medium text-center">C</td>
+                                    <td class="px-4 py-2 font-medium text-center">2.5</td>
+                                    <td class="px-4 py-2 font-medium text-center">60–64</td>
+                                </tr>
+                                <tr class="grade-Dplus">
+                                    <td class="px-4 py-2 font-medium text-center">D+</td>
+                                    <td class="px-4 py-2 font-medium text-center">2.0</td>
+                                    <td class="px-4 py-2 font-medium text-center">55–59</td>
+                                </tr>
+                                <tr class="grade-D">
+                                    <td class="px-4 py-2 font-medium text-center">D</td>
+                                    <td class="px-4 py-2 font-medium text-center">1.5</td>
+                                    <td class="px-4 py-2 font-medium text-center">50–54</td>
+                                </tr>
+                                <tr class="grade-F">
+                                    <td class="px-4 py-2 font-medium text-center">F</td>
+                                    <td class="px-4 py-2 font-medium text-center">0.0</td>
+                                    <td class="px-4 py-2 font-medium text-center">00–49</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Predictive Analysis -->
+                <div id="predictiveCard" class="toolkit-card bg-white p-6 hidden">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-crystal-ball mr-2 text-indigo-500"></i> Predictive Analysis
+                    </h2>
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                        <p id="predictiveText" class="text-gray-700"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User data
+        const userData = {
+            name: "Eselase Bali-Banini",
+            portfolio: "portfolio.html"
+        };
+
+        // Initialize user profile
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('portfolioLink').href = userData.portfolio;
+        document.getElementById('userInitials').textContent = 
+            userData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+        // Grading scale
+        const gradingScale = [
+            { grade: 'A+', point: 5.0, minScore: 85, maxScore: 100 },
+            { grade: 'A', point: 4.5, minScore: 80, maxScore: 84 },
+            { grade: 'B+', point: 4.0, minScore: 75, maxScore: 79 },
+            { grade: 'B', point: 3.5, minScore: 70, maxScore: 74 },
+            { grade: 'C+', point: 3.0, minScore: 65, maxScore: 69 },
+            { grade: 'C', point: 2.5, minScore: 60, maxScore: 64 },
+            { grade: 'D+', point: 2.0, minScore: 55, maxScore: 59 },
+            { grade: 'D', point: 1.5, minScore: 50, maxScore: 54 },
+            { grade: 'F', point: 0.0, minScore: 0, maxScore: 49 }
+        ];
+
+        // Academic classes based on CGPA
+        const academicClasses = [
+            { min: 4.5, class: "First Class" },
+            { min: 3.5, class: "Second Class Upper" },
+            { min: 2.5, class: "Second Class Lower" },
+            { min: 2.0, class: "Third Class" },
+            { min: 0.0, class: "Pass" }
+        ];
+
+        // App state
+        let semesters = [];
+        let currentSemesterId = null;
+        let gpaChart = null;
+
+        // DOM elements
+        const semestersContainer = document.getElementById('semestersContainer');
+        const addSemesterBtn = document.getElementById('addSemesterBtn');
+        const noSemestersMessage = document.getElementById('noSemestersMessage');
+
+        // Check if localStorage is available
+        function isLocalStorageAvailable() {
+            try {
+                const test = '__storage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data from localStorage if available
+            loadFromLocalStorage();
+            
+            // Initialize UI
+            initializeUI();
+            
+            // Set up event listeners
+            addSemesterBtn.addEventListener('click', addSemester);
+        });
+
+        // Initialize UI components
+        function initializeUI() {
+            // If no semesters exist, show the empty state
+            if (semesters.length === 0) {
+                noSemestersMessage.classList.remove('hidden');
+            } else {
+                noSemestersMessage.classList.add('hidden');
+                renderSemesters();
+                updateSummary();
+                renderGPAChart();
+            }
+        }
+
+        // Add a new semester
+        function addSemester() {
+            const semesterId = Date.now().toString();
+            const semesterNumber = semesters.length + 1;
+            
+            const newSemester = {
+                id: semesterId,
+                name: `Semester ${semesterNumber}`,
+                courses: []
+            };
+            
+            semesters.push(newSemester);
+            currentSemesterId = semesterId;
+            
+            noSemestersMessage.classList.add('hidden');
+            renderSemesters();
+            updateSummary();
+            renderGPAChart();
+            saveToLocalStorage();
+        }
+
+        // Delete a semester
+        function deleteSemester(semesterId) {
+            semesters = semesters.filter(semester => semester.id !== semesterId);
+            
+            // If we deleted the current semester, set to the last one or add a new one
+            if (currentSemesterId === semesterId) {
+                if (semesters.length > 0) {
+                    currentSemesterId = semesters[semesters.length - 1].id;
+                } else {
+                    noSemestersMessage.classList.remove('hidden');
+                    currentSemesterId = null;
+                }
+            }
+            
+            if (semesters.length === 0) {
+                noSemestersMessage.classList.remove('hidden');
+            }
+            
+            renderSemesters();
+            updateSummary();
+            renderGPAChart();
+            saveToLocalStorage();
+        }
+
+        // Add a new course to a semester
+        function addCourse(semesterId) {
+            const semester = semesters.find(s => s.id === semesterId);
+            if (!semester) return;
+            
+            const newCourse = {
+                id: Date.now().toString(),
+                name: '',
+                creditHours: 3,
+                score: 0,
+                grade: 'F',
+                gradePoint: 0.0
+            };
+            
+            semester.courses.push(newCourse);
+            renderSemesters();
+            saveToLocalStorage();
+        }
+
+        // Delete a course from a semester
+        function deleteCourse(semesterId, courseId) {
+            const semester = semesters.find(s => s.id === semesterId);
+            if (!semester) return;
+            
+            semester.courses = semester.courses.filter(course => course.id !== courseId);
+            renderSemesters();
+            updateSummary();
+            renderGPAChart();
+            saveToLocalStorage();
+        }
+
+        // Update course details
+        function updateCourse(semesterId, courseId, field, value) {
+            const semester = semesters.find(s => s.id === semesterId);
+            if (!semester) return;
+            
+            const course = semester.courses.find(c => c.id === courseId);
+            if (!course) return;
+            
+            if (field === 'name') {
+                course.name = value;
+            } else if (field === 'creditHours') {
+                const hours = parseInt(value) || 0;
+                course.creditHours = hours > 0 ? hours : 1;
+            } else if (field === 'score') {
+                const score = parseInt(value) || 0;
+                course.score = Math.min(Math.max(score, 0), 100);
+                
+                // Update grade and grade point based on score
+                const gradeInfo = getGradeInfo(course.score);
+                course.grade = gradeInfo.grade;
+                course.gradePoint = gradeInfo.point;
+            }
+            
+            updateSummary();
+            renderGPAChart();
+            saveToLocalStorage();
+        }
+
+        // Get grade information based on score
+        function getGradeInfo(score) {
+            for (const gradeInfo of gradingScale) {
+                if (score >= gradeInfo.minScore && score <= gradeInfo.maxScore) {
+                    return gradeInfo;
+                }
+            }
+            return { grade: 'F', point: 0.0 };
+        }
+
+        // Get academic class based on CGPA
+        function getAcademicClass(cgpa) {
+            for (const classInfo of academicClasses) {
+                if (cgpa >= classInfo.min) {
+                    return classInfo.class;
+                }
+            }
+            return "Pass";
+        }
+
+        // Render all semesters
+        function renderSemesters() {
+            semestersContainer.innerHTML = '';
+            
+            if (semesters.length === 0) {
+                noSemestersMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noSemestersMessage.classList.add('hidden');
+            
+            semesters.forEach(semester => {
+                const isCurrent = semester.id === currentSemesterId;
+                
+                const semesterCard = document.createElement('div');
+                semesterCard.className = `bg-white border rounded-lg mb-4 ${isCurrent ? 'border-indigo-500' : 'border-gray-200'}`;
+                
+                // Semester header
+                const header = document.createElement('div');
+                header.className = 'flex justify-between items-center p-4 border-b';
+                
+                const title = document.createElement('h3');
+                title.className = 'text-lg font-semibold text-gray-800 flex items-center';
+                title.innerHTML = `<i class="fas fa-bookmark mr-2 ${isCurrent ? 'text-indigo-500' : 'text-gray-400'}"></i>${semester.name}`;
+                
+                const actions = document.createElement('div');
+                actions.className = 'flex space-x-2';
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.title = 'Delete Semester';
+                deleteBtn.addEventListener('click', () => deleteSemester(semester.id));
+                
+                const selectBtn = document.createElement('button');
+                selectBtn.className = `px-3 py-1 rounded-full text-sm ${isCurrent ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 hover:bg-gray-200'}`;
+                selectBtn.innerHTML = isCurrent ? '<i class="fas fa-check-circle mr-1"></i> Current' : '<i class="fas fa-mouse-pointer mr-1"></i> Select';
+                selectBtn.addEventListener('click', () => {
+                    currentSemesterId = semester.id;
+                    renderSemesters();
+                });
+                
+                actions.appendChild(deleteBtn);
+                actions.appendChild(selectBtn);
+                
+                header.appendChild(title);
+                header.appendChild(actions);
+                
+                // Courses table
+                const coursesTable = document.createElement('div');
+                coursesTable.className = 'overflow-x-auto';
+                
+                const table = document.createElement('table');
+                table.className = 'w-full';
+                
+                // Table header
+                const thead = document.createElement('thead');
+                thead.className = 'bg-gray-50';
+                
+                const headerRow = document.createElement('tr');
+                headerRow.innerHTML = `
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
+                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                `;
+                
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Table body
+                const tbody = document.createElement('tbody');
+                tbody.className = 'divide-y divide-gray-200';
+                
+                if (semester.courses.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500'>
+                            <i class="fas fa-book-open mr-1"></i> No courses added yet
+                        </td>
+                    `;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    semester.courses.forEach(course => {
+                        const row = document.createElement('tr');
+                        row.className = 'course-row hover:bg-gray-50';
+                        
+                        row.innerHTML = `
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="text" value="${course.name}" 
+                                    onchange="updateCourse('${semester.id}', '${course.id}', 'name', this.value)"
+                                    class="w-full px-3 py-1 border rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 course-input">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center">
+                                <input type="number" min="1" value="${course.creditHours}" 
+                                    onchange="updateCourse('${semester.id}', '${course.id}', 'creditHours', this.value)"
+                                    class="w-16 px-2 py-1 border rounded-lg text-center focus:outline-none focus:ring-1 focus:ring-indigo-500 course-input">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center">
+                                <input type="number" min="0" max="100" value="${course.score}" 
+                                    onchange="updateCourse('${semester.id}', '${course.id}', 'score', this.value)"
+                                    class="w-16 px-2 py-1 border rounded-lg text-center focus:outline-none focus:ring-1 focus:ring-indigo-500 course-input">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center font-medium ${getGradeColorClass(course.grade)}">
+                                ${course.grade}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center font-medium">
+                                ${course.gradePoint.toFixed(1)}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center">
+                                <button onclick="deleteCourse('${semester.id}', '${course.id}')" 
+                                    class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        
+                        tbody.appendChild(row);
+                    });
+                }
+                
+                table.appendChild(tbody);
+                coursesTable.appendChild(table);
+                
+                // Add course button
+                const addCourseBtn = document.createElement('div');
+                addCourseBtn.className = 'p-4 border-t flex justify-center';
+                
+                const btn = document.createElement('button');
+                btn.className = 'text-indigo-600 hover:text-indigo-800 flex items-center px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors';
+                btn.innerHTML = '<i class="fas fa-plus-circle mr-2"></i> Add Course';
+                btn.addEventListener('click', () => addCourse(semester.id));
+                
+                addCourseBtn.appendChild(btn);
+                
+                // Semester summary (only for current semester)
+                if (isCurrent) {
+                    const summary = document.createElement('div');
+                    summary.className = 'p-4 border-t bg-gray-50 flex justify-between items-center rounded-b-lg';
+                    
+                    const semesterSummary = calculateSemesterSummary(semester);
+                    
+                    summary.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-gray-400"></i>
+                            <span class="text-sm text-gray-500">Credits: </span>
+                            <span class="font-medium ml-1">${semesterSummary.creditHours}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-star mr-2 text-gray-400"></i>
+                            <span class="text-sm text-gray-500">Points: </span>
+                            <span class="font-medium ml-1">${semesterSummary.gradePoints.toFixed(1)}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-calculator mr-2 text-gray-400"></i>
+                            <span class="text-sm text-gray-500">GPA: </span>
+                            <span class="font-bold ml-1 ${getGPAColorClass(semesterSummary.gpa)}">${semesterSummary.gpa.toFixed(2)}</span>
+                        </div>
+                    `;
+                    
+                    semesterCard.appendChild(header);
+                    semesterCard.appendChild(coursesTable);
+                    semesterCard.appendChild(addCourseBtn);
+                    semesterCard.appendChild(summary);
+                } else {
+                    semesterCard.appendChild(header);
+                    semesterCard.appendChild(coursesTable);
+                    semesterCard.appendChild(addCourseBtn);
+                }
+                
+                semestersContainer.appendChild(semesterCard);
+            });
+        }
+
+        // Get color class based on grade
+        function getGradeColorClass(grade) {
+            switch(grade) {
+                case 'A+': return 'grade-Aplus';
+                case 'A': return 'grade-A';
+                case 'B+': return 'grade-Bplus';
+                case 'B': return 'grade-B';
+                case 'C+': return 'grade-Cplus';
+                case 'C': return 'grade-C';
+                case 'D+': return 'grade-Dplus';
+                case 'D': return 'grade-D';
+                case 'F': return 'grade-F';
+                default: return 'text-gray-500';
+            }
+        }
+
+        // Get color class based on GPA
+        function getGPAColorClass(gpa) {
+            if (gpa >= 4.5) return 'text-green-600';
+            if (gpa >= 3.5) return 'text-blue-500';
+            if (gpa >= 2.5) return 'text-yellow-500';
+            if (gpa >= 2.0) return 'text-orange-500';
+            return 'text-red-500';
+        }
+
+        // Calculate semester summary
+        function calculateSemesterSummary(semester) {
+            let creditHours = 0;
+            let gradePoints = 0;
+            
+            semester.courses.forEach(course => {
+                creditHours += course.creditHours;
+                gradePoints += course.creditHours * course.gradePoint;
+            });
+            
+            const gpa = creditHours > 0 ? gradePoints / creditHours : 0;
+            
+            return {
+                creditHours,
+                gradePoints,
+                gpa
+            };
+        }
+
+        // Calculate cumulative summary
+        function calculateCumulativeSummary() {
+            let totalCreditHours = 0;
+            let totalGradePoints = 0;
+            
+            semesters.forEach(semester => {
+                const summary = calculateSemesterSummary(semester);
+                totalCreditHours += summary.creditHours;
+                totalGradePoints += summary.gradePoints;
+            });
+            
+            const cgpa = totalCreditHours > 0 ? totalGradePoints / totalCreditHours : 0;
+            
+            return {
+                totalCreditHours,
+                totalGradePoints,
+                cgpa
+            };
+        }
+
+        // Update summary section
+        function updateSummary() {
+            const currentSemester = semesters.find(s => s.id === currentSemesterId);
+            if (!currentSemester) {
+                // Reset summary if no current semester
+                document.getElementById('currentCreditHours').textContent = '0';
+                document.getElementById('currentGradePoints').textContent = '0.00';
+                document.getElementById('currentGPA').textContent = '0.00';
+                document.getElementById('totalCreditHours').textContent = '0';
+                document.getElementById('totalGradePoints').textContent = '0.00';
+                document.getElementById('cgpa').textContent = '0.00';
+                document.getElementById('academicClass').textContent = '-';
+                document.getElementById('predictiveCard').classList.add('hidden');
+                return;
+            }
+            
+            const semesterSummary = calculateSemesterSummary(currentSemester);
+            const cumulativeSummary = calculateCumulativeSummary();
+            
+            // Update current semester summary
+            document.getElementById('currentCreditHours').textContent = semesterSummary.creditHours;
+            document.getElementById('currentGradePoints').textContent = semesterSummary.gradePoints.toFixed(1);
+            document.getElementById('currentGPA').textContent = semesterSummary.gpa.toFixed(2);
+            
+            // Update cumulative summary
+            document.getElementById('totalCreditHours').textContent = cumulativeSummary.totalCreditHours;
+            document.getElementById('totalGradePoints').textContent = cumulativeSummary.totalGradePoints.toFixed(1);
+            document.getElementById('cgpa').textContent = cumulativeSummary.cgpa.toFixed(2);
+            
+            // Update academic class
+            const academicClass = getAcademicClass(cumulativeSummary.cgpa);
+            document.getElementById('academicClass').textContent = academicClass;
+            
+            // Show predictive analysis if we have at least 2 semesters with data
+            if (semesters.length >= 2) {
+                showPredictiveAnalysis(cumulativeSummary.cgpa);
+            } else {
+                document.getElementById('predictiveCard').classList.add('hidden');
+            }
+        }
+
+        // Show predictive analysis
+        function showPredictiveAnalysis(currentCGPA) {
+            const predictiveCard = document.getElementById('predictiveCard');
+            const predictiveText = document.getElementById('predictiveText');
+            
+            // Calculate total credits and grade points so far
+            const cumulativeSummary = calculateCumulativeSummary();
+            const totalCreditsSoFar = cumulativeSummary.totalCreditHours;
+            const totalGradePointsSoFar = cumulativeSummary.totalGradePoints;
+            
+            // Calculate remaining semesters (assuming 8 semesters total)
+            const remainingSemesters = 8 - semesters.length;
+            
+            // Check for unrealistic slope first
+            const semesterGPAs = semesters.map(sem => calculateSemesterSummary(sem).gpa);
+            const n = semesterGPAs.length;
+            
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (let i = 0; i < n; i++) {
+                sumX += i + 1;
+                sumY += semesterGPAs[i];
+                sumXY += (i + 1) * semesterGPAs[i];
+                sumX2 += (i + 1) * (i + 1);
+            }
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            
+            // Check for unrealistic slope
+            if (Math.abs(slope) > 0.5) {
+                predictiveText.innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> 
+                    Your GPA trend shows an ${slope > 0 ? 'unusually high increase' : 'unusually steep decline'} 
+                    (${slope.toFixed(2)} per semester). Please verify your semester data.
+                `;
+                predictiveCard.classList.remove('hidden');
+                return;
+            }
+            
+            // Calculate predicted final CGPA (capped at 5.0)
+            const predictedFinalCGPA = Math.min(
+                (totalGradePointsSoFar + (5.0 * 15 * remainingSemesters)) / 
+                (totalCreditsSoFar + (15 * remainingSemesters)),
+                5.0
+            );
+            
+            // Determine message based on current performance
+            let message = '';
+            
+            // Calculate required GPA to reach common targets
+            const targets = [
+                { name: "First Class", value: 4.5 },
+                { name: "Second Class Upper", value: 3.5 },
+                { name: "Second Class Lower", value: 2.5 }
+            ];
+            
+            // Find the next achievable target
+            let nextTarget = null;
+            for (const target of targets) {
+                if (currentCGPA < target.value) {
+                    const requiredGradePoints = (target.value * (totalCreditsSoFar + (15 * remainingSemesters))) - totalGradePointsSoFar;
+                    const requiredAverageGPA = requiredGradePoints / (15 * remainingSemesters);
+                    
+                    if (requiredAverageGPA <= 5.0) {
+                        nextTarget = {
+                            name: target.name,
+                            requiredGPA: requiredAverageGPA
+                        };
+                        break;
+                    }
+                }
+            }
+            
+            // Build the prediction message
+            if (nextTarget) {
+                message = `
+                    <i class="fas fa-bullseye text-blue-500 mr-1"></i> 
+                    To achieve <strong>${nextTarget.name}</strong> (${nextTarget.requiredGPA.toFixed(1)}+ CGPA), 
+                    you need an average GPA of <strong>${nextTarget.requiredGPA.toFixed(2)}</strong> 
+                    in your remaining ${remainingSemesters} semesters.
+                `;
+                
+                // Add additional context
+                if (nextTarget.requiredGPA > 4.0) {
+                    message += `<br><br><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> This is challenging but achievable with consistent A grades.`;
+                } else if (nextTarget.requiredGPA > 3.0) {
+                    message += `<br><br><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> This is very achievable with a mix of A and B grades.`;
+                }
+            } else {
+                message = `
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i> 
+                    You're on track to graduate with <strong>${predictedFinalCGPA.toFixed(2)}</strong> CGPA 
+                    if you maintain your current performance.
+                `;
+                
+                if (currentCGPA >= 4.5) {
+                    message += `<br><br><i class="fas fa-award text-gold-500 mr-1"></i> You're currently on track for First Class honors!`;
+                }
+            }
+            
+            // Add trend information if we have enough data
+            if (n >= 3) {
+                if (slope > 0.1) {
+                    message += `<br><br><i class="fas fa-arrow-up text-green-500 mr-1"></i> Your GPA is improving by about ${slope.toFixed(2)} per semester.`;
+                } else if (slope < -0.1) {
+                    message += `<br><br><i class="fas fa-arrow-down text-red-500 mr-1"></i> Your GPA is decreasing by about ${Math.abs(slope).toFixed(2)} per semester.`;
+                } else {
+                    message += `<br><br><i class="fas fa-equals text-blue-500 mr-1"></i> Your GPA is relatively stable.`;
+                }
+            }
+            
+            predictiveText.innerHTML = message;
+            predictiveCard.classList.remove('hidden');
+        }
+
+        // Render GPA progression chart
+        function renderGPAChart() {
+            const ctx = document.getElementById('gpaChart').getContext('2d');
+            
+            // Prepare data
+            const labels = semesters.map((sem, index) => `Sem ${index + 1}`);
+            const data = semesters.map(sem => calculateSemesterSummary(sem).gpa);
+            
+            // Calculate trend line if we have at least 2 data points
+            let trendData = [];
+            if (data.length >= 2) {
+                const n = data.length;
+                let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                for (let i = 0; i < n; i++) {
+                    sumX += i + 1;
+                    sumY += data[i];
+                    sumXY += (i + 1) * data[i];
+                    sumX2 += (i + 1) * (i + 1);
+                }
+                
+                const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+                
+                trendData = labels.map((_, i) => Math.min(intercept + slope * (i + 1), 5.0)); // Cap at 5.0
+            }
+            
+            // Destroy previous chart if it exists
+            if (gpaChart) {
+                gpaChart.destroy();
+            }
+            
+            // Create new chart
+            gpaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Actual GPA',
+                            data: data,
+                            borderColor: 'rgb(79, 70, 229)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointBackgroundColor: 'rgb(79, 70, 229)',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: 'rgb(79, 70, 229)',
+                            pointHoverBorderColor: '#fff',
+                            pointHitRadius: 10,
+                            pointBorderWidth: 2
+                        },
+                        {
+                            label: 'Trend',
+                            data: trendData,
+                            borderColor: 'rgb(156, 163, 175)',
+                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5.0,
+                            ticks: {
+                                stepSize: 0.5
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Save data to localStorage
+        function saveToLocalStorage() {
+            if (!isLocalStorageAvailable()) return;
+            
+            const data = {
+                semesters,
+                currentSemesterId,
+                userData
+            };
+            try {
+                localStorage.setItem('gpaCalculatorData', JSON.stringify(data));
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+            }
+        }
+
+        // Load data from localStorage
+        function loadFromLocalStorage() {
+            if (!isLocalStorageAvailable()) return;
+            
+            try {
+                const savedData = localStorage.getItem('gpaCalculatorData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    semesters = data.semesters || [];
+                    currentSemesterId = data.currentSemesterId || (semesters.length > 0 ? semesters[0].id : null);
+                    userData.name = data.userData?.name || "JohnDoe";
+                    userData.portfolio = data.userData?.portfolio || "portfolio.html";
+                }
+            } catch (e) {
+                console.error("Error loading saved data:", e);
+                // Clear corrupted data
+                localStorage.removeItem('gpaCalculatorData');
+                semesters = [];
+                currentSemesterId = null;
+            }
+        }
+    </script>
+</body>
+</html>
